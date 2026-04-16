@@ -91,7 +91,7 @@ async def lifespan(app: FastAPI):
 
 ## 5. GridDB Cloud: Seamless High-Performance Storage
 
-After you create your [GridDB cloud account](https://www.global.toshiba/ww/products-solutions/ai-iot/griddb/product/griddb-cloud.html) and complete configuration settings, you can run the following script to see if you can access your database within a Python application.
+After you create your [GridDB cloud account](https://www.global.toshiba/ww/products-solutions/ai-iot/griddb/product/griddb-cloud.html) and complete configuration settings, you can run the following script to see if you can access your database within a Python application. You can also quickly set up an instance via the [Microsoft Azure Marketplace](https://portal.azure.com/#create/2812187.griddb_cloud_payasyougo) using the Pay-As-You-Go model to obtain your credentials.
 
 For this system, we utilize **GridDB Cloud**, a fully managed database-as-a-service. It allows us to offload the complexity of database management while retaining the extreme high-performance characteristics of the GridDB engine.
 
