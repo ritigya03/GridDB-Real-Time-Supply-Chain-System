@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+
+# Environments
+.venv
+venv/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+
+# Project Specific
+scratch/
+*.log
+api/static/__pycache__/
+ml/__pycache__/
+db/__pycache__/
+risk/__pycache__/
+ingestion/__pycache__/
+llm/__pycache__/
+features/__pycache__/

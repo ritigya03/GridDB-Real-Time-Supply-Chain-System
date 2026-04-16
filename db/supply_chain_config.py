@@ -1,0 +1,57 @@
+SCENARIO = {
+    "product":       "Premium Dairy Blend — Multi-Flavor",
+    "sku":           "PDB-MF-500ML",
+    "batch_id":      "BATCH-2026-APR-IC",
+    "safe_temp_max":  4.0,
+    "critical_temp": 10.0,
+    "safe_delay_max": 15,
+    "route_summary": "Delhi → Jaipur → Kota → Mumbai",
+}
+
+STAGE_META = {
+    "SUPPLIER": {
+        "company":    "Source Dairy Facility",
+        "location":   "Anand, Gujarat",
+        "city":       "Anand",
+        "icon":       "🏭",
+        "role":       "Raw milk collection & cream separation at -2°C",
+        "safe_temp":  (0, 4),
+        "thresh_temp": 8,
+    },
+    "MANUFACTURING": {
+        "company":    "Regional Processing Center",
+        "location":   "Delhi, NCR",
+        "city":       "Delhi",
+        "icon":       "⚙️",
+        "role":       "Product churning, filling & blast-freezing to -18°C",
+        "safe_temp":  (-2, 6),
+        "thresh_temp": 10,
+    },
+    "WAREHOUSE": {
+        "company":    "Centralized Cold Storage",
+        "location":   "Jaipur, Rajasthan",
+        "city":       "Jaipur",
+        "icon":       "🏬",
+        "role":       "Frozen storage & order consolidation at -20°C",
+        "safe_temp":  (-1, 4),
+        "thresh_temp": 7,
+    },
+    "TRANSPORT": {
+        "company":    "Climate-Controlled Transport",
+        "location":   "Kota, Rajasthan → Mumbai",
+        "city":       "Kota",
+        "icon":       "🚚",
+        "role":       "Refrigerated truck transport (NH-52, 1140 km)",
+        "safe_temp":  (2, 8),
+        "thresh_temp": 12,
+    },
+    "DELIVERY": {
+        "company":    "Last-Mile Delivery Hub",
+        "location":   "Mumbai, Maharashtra",
+        "city":       "Mumbai",
+        "icon":       "📦",
+        "role":       "Last-mile delivery to retail outlets & supermarkets",
+        "safe_temp":  (3, 10),
+        "thresh_temp": 15,
+    },
+}

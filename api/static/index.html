@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+<title>Premium Cold-Chain AI — Supply Chain Intelligence</title>
+<meta name="description" content="Real-time AI monitoring of a high-performance dairy cold-chain: Delhi → Jaipur → Kota → Mumbai. Anomaly detection powered by GridDB and LLM reasoning."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Light theme */
+  --bg:#f5f7fb;
+  --bg2:#ffffff;
+  --bg3:#f0f2f6;
+  --card:#ffffff;
+  --card2:#fafcff;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --accent:#3b82f6;
+  --accent2:#2563eb;
+  --accent3:#60a5fa;
+  --green:#16a34a;
+  --yellow:#ca8a04;
+  --orange:#ea580c;
+  --red:#dc2626;
+  --text:#1e293b;
+  --text2:#334155;
+  --text3:#64748b;
+  --supplier:#8b5cf6;
+  --mfg:#0ea5e9;
+  --warehouse:#10b981;
+  --transport:#f97316;
+  --delivery:#ec4899;
+  --ice:#0284c7;
+  --ice2:#38bdf8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg3)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px}
+
+/* ── Header ── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.logo{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:white}
+.logo h1{font-size:1rem;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.logo-sub{color:var(--text3);font-size:.7rem;font-weight:400;margin-top:1px}
+
+/* Product banner in header */
+.product-banner{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:1.5rem;
+  padding:.4rem 1rem;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.15);
+  border-radius:12px;font-size:.72rem;color:var(--ice);
+}
+.product-banner span{color:var(--text3);font-size:.65rem;display:block;margin-top:1px}
+.pb-sep{width:1px;height:28px;background:var(--border2)}
+
+.header-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.live-badge{display:flex;align-items:center;gap:.4rem;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:var(--green);padding:.3rem .8rem;border-radius:999px;font-size:.7rem;font-weight:600}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse-dot 1.4s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+#global-chip{padding:.3rem 1rem;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid;transition:all .5s}
+
+/* ── Layout ── */
+main{max-width:1500px;margin:0 auto;padding:1.5rem}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:1rem}
+
+/* ── Route map ── */
+#route-section{margin-bottom:1.5rem}
+.route-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:24px;
+  padding:1.5rem 2rem;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.03);
+}
+.route-wrap::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(14,165,233,.04) 0%,transparent 70%);
+  pointer-events:none
+}
+.route-track{display:flex;align-items:stretch;position:relative}
+canvas#particles-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+
+/* Stage column */
+.stage-col{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  position:relative;z-index:1;cursor:pointer;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  padding:.25rem .5rem;
+}
+.stage-col:hover{transform:translateY(-4px)}
+.stage-col.active .node-ring{animation:ring-pulse .7s ease-out}
+@keyframes ring-pulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.4)}100%{box-shadow:0 0 0 12px rgba(59,130,246,0)}}
+
+.node-ring{
+  width:72px;height:72px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;transition:border-color .4s,box-shadow .4s;
+  background:var(--card2);
+}
+.node-icon{font-size:1.8rem;position:relative;z-index:1}
+.node-arc{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px)}
+.arc-track{fill:none;stroke:var(--border);stroke-width:3}
+.arc-fill{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset 1s ease,stroke .5s;transform:rotate(-90deg);transform-origin:50% 50%}
+
+.stage-name{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);text-align:center}
+.stage-company{font-size:.7rem;font-weight:600;text-align:center;color:var(--text);line-height:1.3}
+.stage-city{font-size:.6rem;color:var(--text3);text-align:center}
+.stage-score{font-size:1.1rem;font-weight:800;font-family:'JetBrains Mono',monospace;margin-top:.1rem}
+.stage-badge{
+  font-size:.56rem;font-weight:700;padding:.12rem .45rem;border-radius:999px;
+  text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem;
+}
+.stage-temp{font-size:.65rem;color:var(--text2);margin-top:.1rem}
+
+/* Connector with arrow */
+.route-connector{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;z-index:1;padding:0 .25rem;flex-shrink:0;width:52px;
+}
+.conn-line{width:100%;height:2px;background:linear-gradient(90deg,var(--border2),var(--border));position:relative;overflow:hidden}
+.conn-line::after{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,var(--accent2),transparent);
+  animation:flow-conn 2s linear infinite;
+}
+@keyframes flow-conn{0%{left:-100%}100%{left:100%}}
+.conn-city{font-size:.55rem;color:var(--text3);white-space:nowrap;margin-top:.3rem}
+.conn-arrow{font-size:.85rem;color:var(--border2);margin-bottom:.2rem}
+
+/* ── Content grid ── */
+.content-grid{display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}}
+
+/* ── Stage detail panel ── */
+#detail-panel{
+  background:var(--card);border:1px solid var(--border);border-radius:24px;
+  padding:1.5rem;transition:border-color .4s,box-shadow .4s;box-shadow:0 4px 12px rgba(0,0,0,.02);
+}
+.panel-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.panel-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;background:var(--bg3)}
+.panel-stage-name{font-size:1.1rem;font-weight:700}
+.panel-company{font-size:.78rem;color:var(--accent2);font-weight:500;margin-top:1px}
+.panel-location{font-size:.68rem;color:var(--text3);margin-top:1px}
+
+/* Anomaly tag */
+.anomaly-tag{
+  display:inline-flex;align-items:center;gap:.35rem;margin-left:auto;
+  padding:.25rem .7rem;border-radius:999px;font-size:.68rem;font-weight:700;
+  background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.3);
+  animation:blink-tag 1.5s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes blink-tag{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Intensity badge */
+.intensity-badge{
+  background:rgba(234,88,12,.1);border:1px solid var(--orange);border-radius:12px;
+  padding:.3rem .6rem;margin-bottom:.85rem;text-align:center;font-size:.7rem;
+  font-weight:700;color:var(--orange);
+}
+
+/* Gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:.75rem 0}
+.gauge-level{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:.3rem}
+
+/* LLM insight box */
+.llm-insight{
+  background:linear-gradient(135deg,rgba(124,58,237,.04),rgba(14,165,233,.04));
+  border:1px solid rgba(124,58,237,.15);border-radius:16px;
+  padding:.85rem 1rem;margin-bottom:.85rem;
+  font-size:.78rem;color:var(--text2);line-height:1.6;
+  position:relative;
+}
+.llm-insight::before{content:'🧠';position:absolute;top:.7rem;right:.85rem;font-size:.9rem;opacity:.6}
+.llm-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;margin-bottom:.4rem}
+
+/* Metrics row */
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.75rem}
+.metric-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:.65rem .75rem;text-align:center}
+.metric-label{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem}
+.metric-val{font-size:1.1rem;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1}
+.metric-unit{font-size:.58rem;color:var(--text3);margin-top:2px}
+
+/* Safe range indicator */
+.safe-range{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:.5rem .85rem;font-size:.72rem;color:var(--text2);margin-bottom:.75rem;
+}
+.safe-range-label{color:var(--text3);font-size:.62rem}
+
+/* Risk bar */
+.risk-bar-wrap{margin-bottom:.75rem}
+.risk-bar-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text2);margin-bottom:.3rem}
+.risk-bar-track{height:7px;background:var(--border);border-radius:999px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:999px;transition:width 1s ease,background .5s}
+
+/* ── Right column ── */
+.right-col{display:flex;flex-direction:column;gap:1.2rem}
+
+/* ── Bottom horizontal row (Risk Propagation · GridDB Writes · Live Feed) ── */
+.bottom-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:1.2rem;
+  margin-top:1.5rem;
+  align-items:start;
+}
+@media(max-width:1100px){.bottom-row{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.bottom-row{grid-template-columns:1fr}}
+
+/* Global AI insights */
+.insights-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.25rem;box-shadow:0 4px 12px rgba(0,0,0,.02)}
+.insights-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.insights-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,var(--accent));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;color:white}
+.insights-title{font-weight:700;font-size:.88rem}
+.insights-sub{font-size:.63rem;color:var(--text2)}
+.insight-source{font-size:.58rem;color:var(--text3);margin-left:auto;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.insight-summary{font-size:.78rem;color:var(--text2);line-height:1.6;margin-bottom:.85rem;padding:.7rem;background:var(--bg3);border-radius:12px;border-left:3px solid var(--accent)}
+.insight-section{margin-bottom:.75rem}
+.insight-section-title{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:700;margin-bottom:.4rem}
+.insight-item{display:flex;align-items:flex-start;gap:.45rem;font-size:.75rem;color:var(--text2);padding:.3rem 0;border-bottom:1px solid rgba(0,0,0,.05);line-height:1.45}
+.insight-item:last-child{border-bottom:none}
+.insight-bullet{width:6px;height:6px;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+
+/* Cascade */
+.cascade-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.25rem}
+.cascade-row{display:flex;align-items:center;gap:.55rem;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.cascade-row:last-child{border-bottom:none}
+.cascade-stage{font-size:.65rem;font-weight:600;text-transform:uppercase;width:90px;flex-shrink:0;line-height:1.3}
+.cascade-city{font-size:.58rem;color:var(--text3);font-weight:400;display:block}
+.cascade-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:999px;overflow:hidden}
+.cascade-bar{height:100%;border-radius:999px;transition:width 1s ease,background .5s}
+.cascade-num{font-size:.7rem;font-weight:700;font-family:'JetBrains Mono',monospace;width:34px;text-align:right;flex-shrink:0}
+
+/* Event feed */
+.feed-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.25rem}
+.feed-list{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:.4rem}
+.feed-item{
+  display:grid;grid-template-columns:8px 1fr auto;gap:.5rem;align-items:center;
+  padding:.4rem .6rem;border-radius:12px;background:var(--bg3);
+  border:1px solid transparent;font-size:.7rem;animation:slide-in .3s ease;
+}
+@keyframes slide-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.feed-stage-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.feed-status{font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:6px;flex-shrink:0}
+
+/* Inject anomaly */
+.inject-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1rem 1.25rem;margin-bottom:1.5rem;box-shadow:0 2px 6px rgba(0,0,0,.02)}
+.inject-title{font-size:.72rem;font-weight:700;color:var(--text2);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.inject-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem}
+.inject-btn{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  padding:.5rem .3rem;border-radius:14px;font-size:.6rem;font-weight:600;
+  cursor:pointer;text-align:center;transition:all .2s;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;
+}
+.inject-btn .btn-icon{font-size:1.2rem}
+.inject-btn .btn-city{font-size:.55rem;color:var(--text3)}
+.inject-btn:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.4);color:var(--red);transform:translateY(-2px)}
+.inject-btn:active{transform:scale(.96)}
+
+/* Warmup */
+#warmup{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem}
+.warmup-logo{font-size:3.5rem;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.warmup-text{font-size:1.2rem;font-weight:600;color:var(--text)}
+.warmup-route{font-size:.82rem;color:var(--ice);margin-top:-.3rem}
+.warmup-bar{width:280px;height:4px;background:var(--border);border-radius:999px;overflow:hidden}
+.warmup-progress{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:999px;animation:warmup-fill 3s ease forwards}
+@keyframes warmup-fill{0%{width:0%}80%{width:85%}100%{width:100%}}
+.warmup-sub{font-size:.72rem;color:var(--text3)}
+
+/* Risk color helpers */
+.low{color:#16a34a}.medium{color:#ca8a04}.high{color:#ea580c}.critical{color:#dc2626}
+
+
+/* ── Injection toast ── */
+#inject-toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:200;
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:.85rem 1.25rem;min-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.1);
+  display:none;animation:toast-in .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes toast-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.toast-title{font-weight:700;font-size:.82rem;margin-bottom:.3rem}
+.toast-body{font-size:.72rem;color:var(--text2);line-height:1.5}
+.toast-progress{height:3px;background:var(--border);border-radius:999px;margin-top:.7rem;overflow:hidden}
+.toast-bar{height:100%;background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:999px;width:100%;transition:width linear}
+
+/* ── GridDB writes log ── */
+.writes-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.25rem}
+.writes-list{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem}
+.write-row{
+  display:grid;grid-template-columns:6px 1fr auto;gap:.5rem;align-items:start;
+  padding:.4rem .55rem;border-radius:12px;background:var(--bg3);
+  border-left:3px solid transparent;font-size:.68rem;animation:slide-in .25s ease;
+}
+.write-row.forced{border-left-color:var(--orange);background:rgba(234,88,12,.05)}
+.write-row.ok .write-dot{background:var(--green)}
+.write-row.fail .write-dot{background:var(--red)}
+.write-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.write-ok-badge{font-size:.58rem;font-weight:700;padding:.1rem .35rem;border-radius:6px;flex-shrink:0;align-self:center}
+</style>
+</head>
+<body>
+
+<!-- Warmup overlay -->
+<div id="warmup">
+  <div class="warmup-logo">🍦</div>
+  <div class="warmup-text">Ice Cream Cold-Chain AI</div>
+  <div class="warmup-route">Delhi → Jaipur → Kota → Mumbai</div>
+  <div class="warmup-bar"><div class="warmup-progress"></div></div>
+  <div class="warmup-sub">Training ML model · Connecting to GridDB · Starting pipeline…</div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🍦</div>
+    <div>
+      <h1>Cold-Chain AI Monitor</h1>
+      <div class="logo-sub">GridDB Cloud · Real-Time Intelligence</div>
+    </div>
+  </div>
+
+  <div class="product-banner" id="product-banner">
+    <div>
+      <div style="font-weight:700;font-size:.78rem" id="hdr-product">Premium Dairy Blend</div>
+      <span id="hdr-sku">SKU: PDB-MF-500ML</span>
+    </div>
+    <div class="pb-sep"></div>
+    <div style="text-align:center">
+      <div style="font-weight:600" id="hdr-route">Delhi → Jaipur → Kota → Mumbai</div>
+      <span id="hdr-batch">BATCH-2026-APR-IC</span>
+    </div>
+    <div class="pb-sep"></div>
+    <div style="text-align:center">
+      <div style="font-weight:600">Safe Temp</div>
+      <span id="hdr-temp">≤ 4°C</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div id="global-chip">— / 100</div>
+  </div>
+</header>
+
+<!-- Injection toast -->
+<div id="inject-toast">
+  <div class="toast-title" id="toast-title">⚡ Anomaly Injected!</div>
+  <div class="toast-body" id="toast-body">Waiting for next producer batch…</div>
+  <div class="toast-progress"><div class="toast-bar" id="toast-bar"></div></div>
+</div>
+
+<main>
+
+
+  <!-- Inject anomaly -->
+  <div class="inject-card">
+    <div class="inject-title">⚡ Simulate Temperature / Delay Spike at Stage</div>
+    <div class="inject-grid" id="inject-grid">
+      <button class="inject-btn" onclick="injectAnomaly('SUPPLIER')">
+        <span class="btn-icon">🏭</span><span>Supplier</span><span class="btn-city">Anand</span>
+      </button>
+      <button class="inject-btn" onclick="injectAnomaly('MANUFACTURING')">
+        <span class="btn-icon">⚙️</span><span>Mfg</span><span class="btn-city">Delhi</span>
+      </button>
+      <button class="inject-btn" onclick="injectAnomaly('WAREHOUSE')">
+        <span class="btn-icon">🏬</span><span>Warehouse</span><span class="btn-city">Jaipur</span>
+      </button>
+      <button class="inject-btn" onclick="injectAnomaly('TRANSPORT')">
+        <span class="btn-icon">🚚</span><span>Transport</span><span class="btn-city">Kota</span>
+      </button>
+      <button class="inject-btn" onclick="injectAnomaly('DELIVERY')">
+        <span class="btn-icon">📦</span><span>Delivery</span><span class="btn-city">Mumbai</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Route pipeline -->
+  <div id="route-section">
+    <div class="section-title">Live Shipment Route — <span id="route-label">Delhi → Jaipur → Kota → Mumbai</span></div>
+    <div class="route-wrap">
+      <canvas id="particles-canvas"></canvas>
+      <div class="route-track" id="route-track">
+
+        <div class="stage-col" id="col-SUPPLIER" onclick="selectStage('SUPPLIER')">
+          <div class="node-ring" id="ring-SUPPLIER">
+            <svg class="node-arc" viewBox="0 0 80 80">
+              <circle class="arc-track" cx="40" cy="40" r="36"/>
+              <circle class="arc-fill" id="arc-SUPPLIER" cx="40" cy="40" r="36" stroke="var(--supplier)" stroke-dasharray="226" stroke-dashoffset="226"/>
+            </svg>
+            <div class="node-icon">🏭</div>
+          </div>
+          <div class="stage-name" style="color:var(--supplier)">Supplier</div>
+          <div class="stage-company">Source Dairy Facility</div>
+          <div class="stage-city">📍 Anand, GJ</div>
+          <div class="stage-score c-supplier" id="score-SUPPLIER" style="color:var(--supplier)">—</div>
+          <div class="stage-badge" id="badge-SUPPLIER"></div>
+          <div class="stage-temp" id="temp-SUPPLIER">—°C</div>
+        </div>
+
+        <div class="route-connector">
+          <div class="conn-arrow">→</div>
+          <div class="conn-line"></div>
+          <div class="conn-city">Delhi</div>
+        </div>
+
+        <div class="stage-col" id="col-MANUFACTURING" onclick="selectStage('MANUFACTURING')">
+          <div class="node-ring" id="ring-MANUFACTURING">
+            <svg class="node-arc" viewBox="0 0 80 80">
+              <circle class="arc-track" cx="40" cy="40" r="36"/>
+              <circle class="arc-fill" id="arc-MANUFACTURING" cx="40" cy="40" r="36" stroke="var(--mfg)" stroke-dasharray="226" stroke-dashoffset="226"/>
+            </svg>
+            <div class="node-icon">⚙️</div>
+          </div>
+          <div class="stage-name" style="color:var(--mfg)">Manufacturing</div>
+          <div class="stage-company">Regional Processing Center</div>
+          <div class="stage-city">📍 Delhi, NCR</div>
+          <div class="stage-score" id="score-MANUFACTURING" style="color:var(--mfg)">—</div>
+          <div class="stage-badge" id="badge-MANUFACTURING"></div>
+          <div class="stage-temp" id="temp-MANUFACTURING">—°C</div>
+        </div>
+
+        <div class="route-connector">
+          <div class="conn-arrow">→</div>
+          <div class="conn-line"></div>
+          <div class="conn-city">NH-48</div>
+        </div>
+
+        <div class="stage-col" id="col-WAREHOUSE" onclick="selectStage('WAREHOUSE')">
+          <div class="node-ring" id="ring-WAREHOUSE">
+            <svg class="node-arc" viewBox="0 0 80 80">
+              <circle class="arc-track" cx="40" cy="40" r="36"/>
+              <circle class="arc-fill" id="arc-WAREHOUSE" cx="40" cy="40" r="36" stroke="var(--warehouse)" stroke-dasharray="226" stroke-dashoffset="226"/>
+            </svg>
+            <div class="node-icon">🏬</div>
+          </div>
+          <div class="stage-name" style="color:var(--warehouse)">Warehouse</div>
+          <div class="stage-company">Centralized Cold Storage</div>
+          <div class="stage-city">📍 Jaipur, RJ</div>
+          <div class="stage-score" id="score-WAREHOUSE" style="color:var(--warehouse)">—</div>
+          <div class="stage-badge" id="badge-WAREHOUSE"></div>
+          <div class="stage-temp" id="temp-WAREHOUSE">—°C</div>
+        </div>
+
+        <div class="route-connector">
+          <div class="conn-arrow">→</div>
+          <div class="conn-line"></div>
+          <div class="conn-city">NH-52</div>
+        </div>
+
+        <div class="stage-col" id="col-TRANSPORT" onclick="selectStage('TRANSPORT')">
+          <div class="node-ring" id="ring-TRANSPORT">
+            <svg class="node-arc" viewBox="0 0 80 80">
+              <circle class="arc-track" cx="40" cy="40" r="36"/>
+              <circle class="arc-fill" id="arc-TRANSPORT" cx="40" cy="40" r="36" stroke="var(--transport)" stroke-dasharray="226" stroke-dashoffset="226"/>
+            </svg>
+            <div class="node-icon">🚚</div>
+          </div>
+          <div class="stage-name" style="color:var(--transport)">Transport</div>
+          <div class="stage-company">Climate-Controlled Transport</div>
+          <div class="stage-city">📍 Kota → Mumbai</div>
+          <div class="stage-score" id="score-TRANSPORT" style="color:var(--transport)">—</div>
+          <div class="stage-badge" id="badge-TRANSPORT"></div>
+          <div class="stage-temp" id="temp-TRANSPORT">—°C</div>
+        </div>
+
+        <div class="route-connector">
+          <div class="conn-arrow">→</div>
+          <div class="conn-line"></div>
+          <div class="conn-city">1140 km</div>
+        </div>
+
+        <div class="stage-col" id="col-DELIVERY" onclick="selectStage('DELIVERY')">
+          <div class="node-ring" id="ring-DELIVERY">
+            <svg class="node-arc" viewBox="0 0 80 80">
+              <circle class="arc-track" cx="40" cy="40" r="36"/>
+              <circle class="arc-fill" id="arc-DELIVERY" cx="40" cy="40" r="36" stroke="var(--delivery)" stroke-dasharray="226" stroke-dashoffset="226"/>
+            </svg>
+            <div class="node-icon">📦</div>
+          </div>
+          <div class="stage-name" style="color:var(--delivery)">Delivery</div>
+          <div class="stage-company">Last-Mile Delivery Hub</div>
+          <div class="stage-city">📍 Mumbai, MH</div>
+          <div class="stage-score" id="score-DELIVERY" style="color:var(--delivery)">—</div>
+          <div class="stage-badge" id="badge-DELIVERY"></div>
+          <div class="stage-temp" id="temp-DELIVERY">—°C</div>
+        </div>
+
+      </div><!-- /route-track -->
+    </div><!-- /route-wrap -->
+  </div>
+
+  <!-- Content grid -->
+  <div class="content-grid">
+
+    <!-- Left: stage detail -->
+    <div id="detail-panel" style="background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.5rem;transition:border-color .4s,box-shadow .4s">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:360px;gap:.75rem;color:var(--text3)">
+        <div style="font-size:3rem">👆</div>
+        <div style="font-size:.9rem;font-weight:600">Click any stage to see details</div>
+        <div style="font-size:.75rem">Temperature · Delay · ML Score · AI Reasoning</div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="right-col">
+
+      <!-- Global AI insights -->
+      <div class="insights-card">
+        <div class="insights-header">
+          <div class="insights-icon">🧠</div>
+          <div>
+            <div class="insights-title">AI Cold-Chain Analysis</div>
+            <div class="insights-sub">LLM reasoning on live sensor data</div>
+          </div>
+          <div class="insight-source" id="insight-source">—</div>
+        </div>
+        <div id="insights-body">
+          <div style="color:var(--text3);font-size:.78rem;text-align:center;padding:2rem 0">Waiting for pipeline data…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom horizontal row: Risk Propagation · GridDB Writes · Live Feed -->
+  <div class="bottom-row">
+
+    <!-- Cascade risk -->
+    <div class="cascade-card">
+      <div class="section-title">Risk Propagation — Route</div>
+      <div id="cascade-rows"></div>
+    </div>
+
+    <!-- GridDB Live Writes -->
+    <div class="writes-card">
+      <div class="section-title">🗄 GridDB Live Row Writes</div>
+      <div class="writes-list" id="writes-list">
+        <div style="color:var(--text3);font-size:.75rem;text-align:center;padding:1rem 0">Waiting for inserts…</div>
+      </div>
+    </div>
+
+    <!-- Event feed -->
+    <div class="feed-card">
+      <div class="section-title">Live Sensor Feed</div>
+      <div class="feed-list" id="feed-list">
+        <div style="color:var(--text3);font-size:.75rem;text-align:center;padding:1rem 0">Waiting for events…</div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// State
+const STAGES = ['SUPPLIER','MANUFACTURING','WAREHOUSE','TRANSPORT','DELIVERY'];
+const STAGE_COLOR = {
+  SUPPLIER:'#8b5cf6', MANUFACTURING:'#0ea5e9',
+  WAREHOUSE:'#10b981', TRANSPORT:'#f97316', DELIVERY:'#ec4899'
+};
+const STAGE_CITIES = {
+  SUPPLIER:'Anand', MANUFACTURING:'Delhi',
+  WAREHOUSE:'Jaipur', TRANSPORT:'Kota', DELIVERY:'Mumbai'
+};
+const STAGE_COMPANIES = {
+  SUPPLIER:'Source Dairy Facility', MANUFACTURING:'Regional Processing Center',
+  WAREHOUSE:'Centralized Cold Storage', TRANSPORT:'Climate-Controlled Transport', DELIVERY:'Last-Mile Delivery Hub'
+};
+const STAGE_THRESH = {
+  SUPPLIER:8, MANUFACTURING:10, WAREHOUSE:7, TRANSPORT:12, DELIVERY:15
+};
+const STAGE_ICONS = {
+  SUPPLIER:'🏭', MANUFACTURING:'⚙️', WAREHOUSE:'🏬', TRANSPORT:'🚚', DELIVERY:'📦'
+};
+
+let state = { stage_risks:{}, cascade:{}, recent_events:[], stage_insights:{}, scenario:{}, anomaly_intensity:{} };
+let selectedStage = null;
+let insightsData  = {};
+
+// Helpers
+function riskColor(s){ return s<30?'#16a34a':s<55?'#ca8a04':s<75?'#ea580c':'#dc2626' }
+function riskLabel(s){ return s<30?'LOW':s<55?'MEDIUM':s<75?'HIGH':'CRITICAL' }
+function riskBg(s){ return s<30?'rgba(22,163,74,.1)':s<55?'rgba(202,138,4,.1)':s<75?'rgba(234,88,12,.1)':'rgba(220,38,38,.1)' }
+function riskBorder(s){ return s<30?'rgba(22,163,74,.3)':s<55?'rgba(202,138,4,.3)':s<75?'rgba(234,88,12,.3)':'rgba(220,38,38,.35)' }
+function tempColor(temp, stage){
+  const thresh = STAGE_THRESH[stage] || 10;
+  return temp > thresh ? '#dc2626' : temp > thresh * 0.75 ? '#ea580c' : '#16a34a';
+}
+
+// Arc gauge
+function setArc(stage, score){
+  const arc = document.getElementById('arc-'+stage);
+  if(!arc) return;
+  arc.style.strokeDashoffset = 226 - (score/100)*226;
+  arc.style.stroke = riskColor(score);
+}
+
+// Update route nodes
+function updateNodes(stageRisks){
+  STAGES.forEach(stage => {
+    const risk = stageRisks[stage];
+    if(!risk) return;
+    // Priority: Cascaded risk (includes upstream leaks), fallback to local risk
+    const cascaded = (state.cascade.stage_cascade || {})[stage];
+    const score = cascaded !== undefined ? cascaded : (risk.risk_score || 0);
+    const f = risk.features || {};
+    const temp = f.mean_temp || 0;
+
+    const scoreEl = document.getElementById('score-'+stage);
+    if(scoreEl) scoreEl.textContent = risk.event_count > 0 ? score.toFixed(0) : '—';
+
+    const tempEl = document.getElementById('temp-'+stage);
+    if(tempEl && risk.event_count > 0){
+      tempEl.textContent = temp.toFixed(1)+'°C';
+      tempEl.style.color = tempColor(temp, stage);
+    }
+
+    const badgeEl = document.getElementById('badge-'+stage);
+    if(badgeEl && risk.event_count > 0){
+      badgeEl.textContent = riskLabel(score);
+      badgeEl.style.background = riskBg(score);
+      badgeEl.style.color = riskColor(score);
+      badgeEl.style.border = '1px solid '+riskBorder(score);
+    }
+
+    if(risk.event_count > 0) setArc(stage, score);
+
+    const ring = document.getElementById('ring-'+stage);
+    if(ring){
+      if(risk.is_anomaly){
+        ring.style.borderColor = riskColor(score);
+        ring.style.boxShadow = `0 0 0 2px ${riskColor(score)}40`;
+      } else {
+        ring.style.borderColor = '';
+        ring.style.boxShadow = '';
+      }
+    }
+  });
+
+  // Global chip
+  const chip = document.getElementById('global-chip');
+  const cascade = state.cascade;
+  if(chip && cascade.global_risk !== undefined){
+    const g = cascade.global_risk;
+    chip.textContent = g.toFixed(1)+'/100 · '+(cascade.risk_level||'');
+    chip.style.background = riskBg(g);
+    chip.style.color = riskColor(g);
+    chip.style.borderColor = riskBorder(g);
+  }
+}
+
+// Gauge SVG
+function renderGauge(score){
+  const color = riskColor(score);
+  const r=45, cx=100, cy=90;
+  const full = Math.PI*r;
+  const dash = (score/100)*full;
+  return `<div class="gauge-wrap">
+    <div style="position:relative;width:200px;height:110px">
+      <svg viewBox="0 10 200 100" width="200" height="110">
+        <path d="M ${cx-r},${cy} A ${r},${r} 0 0 1 ${cx+r},${cy}"
+          fill="none" stroke="var(--border)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M ${cx-r},${cy} A ${r},${r} 0 0 1 ${cx+r},${cy}"
+          fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="${full}" stroke-dashoffset="${full-dash}"
+          style="transition:stroke-dashoffset 1s ease,stroke .5s"/>
+      </svg>
+      <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-size:2.2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${color}">${score.toFixed(0)}</div>
+    </div>
+    <div class="gauge-level" style="color:${color}">${riskLabel(score)} RISK</div>
+  </div>`;
+}
+
+// Detail panel
+function selectStage(stage){
+  selectedStage = stage;
+  STAGES.forEach(s => document.getElementById('col-'+s).classList.remove('active'));
+  document.getElementById('col-'+stage).classList.add('active');
+  renderDetailPanel(stage);
+}
+
+function renderDetailPanel(stage){
+  const risk = state.stage_risks[stage];
+  const panel = document.getElementById('detail-panel');
+  if(!risk || risk.event_count === 0){
+    panel.innerHTML = `<div style="padding:2rem;color:var(--text3);text-align:center">
+      <div style="font-size:2rem;margin-bottom:.75rem">${STAGE_ICONS[stage]}</div>
+      <div style="font-weight:600;margin-bottom:.4rem">${STAGE_COMPANIES[stage]}</div>
+      <div style="font-size:.78rem">Awaiting sensor data from ${STAGE_CITIES[stage]}…</div>
+    </div>`;
+    return;
+  }
+
+  const score = risk.risk_score || 0;
+  const f = risk.features || {};
+  const temp = f.mean_temp || 0;
+  const delay = f.mean_delay || 0;
+  const cascadeScore = (state.cascade.stage_cascade||{})[stage] || score;
+  const thresh = STAGE_THRESH[stage] || 10;
+  const insight = state.stage_insights[stage] || insightsData.stage_insights?.[stage] || 'Analysing current conditions…';
+  const intensity = state.anomaly_intensity?.[stage] || 0;
+
+  const tempAlert = temp > thresh ? `🔴 ${temp.toFixed(1)}°C EXCEEDS THRESHOLD (${thresh}°C) — ICE CREAM MELT RISK` :
+                    temp > thresh*0.75 ? `🟡 ${temp.toFixed(1)}°C — approaching threshold (${thresh}°C)` :
+                    `🟢 ${temp.toFixed(1)}°C — within safe range (≤${thresh}°C)`;
+
+  panel.style.borderColor = risk.is_anomaly ? 'rgba(220,38,38,.3)' : '';
+  panel.style.boxShadow   = risk.is_anomaly ? '0 0 0 2px rgba(220,38,38,.1)' : '';
+
+  let intensityHtml = '';
+  if (intensity > 0) {
+    intensityHtml = `<div class="intensity-badge">💥 Cumulative Anomaly Intensity: x${intensity}</div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-icon-wrap" style="background:${STAGE_COLOR[stage]}10">${STAGE_ICONS[stage]}</div>
+      <div style="flex:1">
+        <div class="panel-stage-name">${stage.charAt(0)+stage.slice(1).toLowerCase()}</div>
+        <div class="panel-company">${STAGE_COMPANIES[stage]}</div>
+        <div class="panel-location">📍 ${STAGE_CITIES[stage]}</div>
+      </div>
+      ${risk.is_anomaly ? '<div class="anomaly-tag">⚠ ANOMALY</div>' : ''}
+    </div>
+
+    ${intensityHtml}
+
+    <div style="font-size:.68rem;background:${risk.is_anomaly?'rgba(220,38,38,.05)':'rgba(22,163,74,.05)'};border:1px solid ${risk.is_anomaly?'rgba(220,38,38,.2)':'rgba(22,163,74,.2)'};border-radius:12px;padding:.5rem .8rem;margin-bottom:.85rem;color:${risk.is_anomaly?'#dc2626':temp>thresh*.75?'#ea580c':'#16a34a'}">
+      ${tempAlert}
+    </div>
+
+    ${renderGauge(score)}
+
+    <div class="llm-insight">
+      <div class="llm-label">🧠 AI Stage Insight</div>
+      ${insight}
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-box">
+        <div class="metric-label">Avg Temp</div>
+        <div class="metric-val" style="color:${tempColor(temp,stage)}">${temp.toFixed(1)}</div>
+        <div class="metric-unit">°C</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Max Temp</div>
+        <div class="metric-val" style="color:${tempColor(f.max_temp||0,stage)}">${(f.max_temp||0).toFixed(1)}</div>
+        <div class="metric-unit">°C</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Avg Delay</div>
+        <div class="metric-val" style="color:${delay>15?'#ea580c':delay>8?'#ca8a04':'var(--text)'}">${delay.toFixed(0)}</div>
+        <div class="metric-unit">min</div>
+      </div>
+    </div>
+
+    <div class="safe-range">
+      <span>🌡</span>
+      <div>
+        <div class="safe-range-label">Safe temp range at this stage</div>
+        <div style="font-weight:600;font-size:.78rem">0°C — ${thresh}°C &nbsp;|&nbsp; Current: <span style="color:${tempColor(temp,stage)}">${temp.toFixed(1)}°C</span></div>
+      </div>
+    </div>
+
+    <div class="risk-bar-wrap">
+      <div class="risk-bar-label"><span>Cascade risk (propagated downstream)</span><span style="color:${riskColor(cascadeScore)}">${cascadeScore.toFixed(1)}/100</span></div>
+      <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${cascadeScore}%;background:${riskColor(cascadeScore)}"></div></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg3);border-radius:12px;font-size:.68rem;color:var(--text3)">
+      <span>${risk.event_count} events in 10-min window</span>
+      <span>ML raw score: ${(risk.ml_score||0).toFixed(1)}</span>
+      <span>Anomaly ratio: ${((f.anomaly_flag_ratio||0)*100).toFixed(0)}%</span>
+    </div>`;
+}
+
+// Cascade rows
+function updateCascade(cascade){
+  const el = document.getElementById('cascade-rows');
+  if(!el) return;
+  const path = cascade.cascade_path || [];
+  if(!path.length){ el.innerHTML='<div style="color:var(--text3);font-size:.75rem">Waiting…</div>'; return; }
+
+  el.innerHTML = path.map(([s,r])=>`
+    <div class="cascade-row">
+      <div class="cascade-stage" style="color:${STAGE_COLOR[s]}">
+        ${STAGE_ICONS[s]} ${s.charAt(0)+s.slice(1).toLowerCase()}
+        <span class="cascade-city">${STAGE_CITIES[s]||''}</span>
+      </div>
+      <div class="cascade-bar-wrap"><div class="cascade-bar" style="width:${r}%;background:${riskColor(r)}"></div></div>
+      <div class="cascade-num" style="color:${riskColor(r)}">${r.toFixed(0)}</div>
+    </div>`).join('');
+}
+
+// AI Insights panel
+function updateInsights(data){
+  if(!data || !data.summary) return;
+  insightsData = data;
+  document.getElementById('insight-source').textContent = data.source||'';
+
+  const lc = {LOW:'#16a34a',MEDIUM:'#ca8a04',HIGH:'#ea580c',CRITICAL:'#dc2626'}[data.risk_level]||'#64748b';
+  const outcomes = (data.predicted_outcomes||[]).map(o=>
+    `<div class="insight-item"><div class="insight-bullet" style="background:${lc}"></div><div>${o}</div></div>`).join('');
+  const actions = (data.suggested_actions||[]).map(a=>
+    `<div class="insight-item"><div class="insight-bullet" style="background:#3b82f6"></div><div>${a}</div></div>`).join('');
+
+  document.getElementById('insights-body').innerHTML = `
+    <div class="insight-summary">${data.summary||''}</div>
+    <div class="insight-section">
+      <div class="insight-section-title">⚠ Predicted Outcomes</div>${outcomes}
+    </div>
+    <div class="insight-section">
+      <div class="insight-section-title">🔧 Suggested Actions</div>${actions}
+    </div>`;
+
+  if(selectedStage) renderDetailPanel(selectedStage);
+}
+
+// Event feed
+function updateFeed(events){
+  const el = document.getElementById('feed-list');
+  if(!el||!events.length) return;
+  const sc = {NORMAL:'rgba(22,163,74,.1)',WARNING:'rgba(202,138,4,.1)',ANOMALY:'rgba(220,38,38,.1)'};
+  const stc= {NORMAL:'#16a34a',WARNING:'#ca8a04',ANOMALY:'#dc2626'};
+  el.innerHTML = events.slice(0,20).map(e=>{
+    const color = STAGE_COLOR[e.stage]||'#64748b';
+    const ts = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '';
+    const thresh = STAGE_THRESH[e.stage] || 10;
+    const tempCol = (e.temperature||0)>thresh ? '#dc2626' : (e.temperature||0)>thresh*.75 ? '#ea580c' : '#16a34a';
+    return `<div class="feed-item" style="border-color:${e.status==='ANOMALY'?'rgba(220,38,38,.2)':'transparent'}">
+      <div class="feed-stage-dot" style="background:${color}"></div>
+      <div style="color:var(--text2);line-height:1.4">
+        <span style="font-weight:600;font-size:.68rem">${STAGE_COMPANIES[e.stage]||e.stage}</span>
+        <span style="color:var(--text3);font-size:.62rem"> · ${STAGE_CITIES[e.stage]||''} · ${ts}</span><br>
+        <span style="color:${tempCol};font-size:.67rem">🌡 ${(e.temperature||0).toFixed(1)}°C</span>
+        <span style="color:var(--text3);font-size:.65rem"> · ⏱ ${e.delay||0}min · 📦 ${e.inventory||0} units</span>
+      </div>
+      <div class="feed-status" style="background:${sc[e.status]||sc.NORMAL};color:${stc[e.status]||stc.NORMAL}">${e.status||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// Particle canvas
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas(){
+  const w = canvas.parentElement;
+  canvas.width = w.clientWidth;
+  canvas.height = w.clientHeight;
+}
+
+class Particle{
+  constructor(){ this.reset(true) }
+  reset(init=false){
+    this.x = init ? Math.random()*canvas.width : 0;
+    this.y = canvas.height/2 + (Math.random()-.5)*28;
+    this.speed = 1 + Math.random()*2;
+    this.size = 4 + Math.random()*5;
+    this.opacity = .6+Math.random()*.3;
+    this.color = '#60a5fa';
+    this.trail = [];
+    this.anomaly = Math.random() < .07;
+    if(this.anomaly) this.color = '#f97316';
+  }
+  update(){
+    this.trail.push({x:this.x, y:this.y});
+    if(this.trail.length>12) this.trail.shift();
+    this.x += this.speed;
+    this.y = canvas.height/2 + Math.sin(this.x*.015)*16;
+    const pct = this.x/canvas.width;
+    if(!this.anomaly){
+      const cols=['#8b5cf6','#0ea5e9','#10b981','#f97316','#ec4899'];
+      this.color = cols[Math.min(4,Math.floor(pct*5))];
+    }
+    if(this.x > canvas.width+20) this.reset();
+  }
+  draw(){
+    this.trail.forEach((pt,i)=>{
+      const a = (i/this.trail.length)*.2*this.opacity;
+      ctx.beginPath();
+      ctx.arc(pt.x,pt.y,this.size*.5,0,Math.PI*2);
+      ctx.fillStyle = this.color + Math.floor(a*255).toString(16).padStart(2,'0');
+      ctx.fill();
+    });
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.shadowBlur = this.anomaly?12:4;
+    ctx.shadowColor = this.color;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function initParticles(){
+  particles=[];
+  for(let i=0;i<16;i++) particles.push(new Particle());
+}
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animateParticles);
+}
+
+// GridDB writes log
+let _lastInsertTs = '';
+function updateWritesLog(inserts){
+  if(!inserts || !inserts.length) return;
+  const el = document.getElementById('writes-list');
+  if(!el) return;
+
+  const newestTs = inserts[inserts.length - 1]?.ts || '';
+  if(newestTs === _lastInsertTs) return;
+  _lastInsertTs = newestTs;
+
+  const statusColor = {NORMAL:'#16a34a',WARNING:'#ca8a04',ANOMALY:'#dc2626'};
+  const rows = [...inserts].reverse();
+
+  el.innerHTML = rows.slice(0, 25).map(r => {
+    const color = STAGE_COLOR[r.stage] || '#64748b';
+    const thresh = STAGE_THRESH[r.stage] || 10;
+    const tempCol = r.temperature > thresh ? '#dc2626' : r.temperature > thresh*.75 ? '#ea580c' : '#16a34a';
+    const ts = r.ts ? new Date(r.ts).toLocaleTimeString() : '';
+    const stCol = statusColor[r.status] || '#16a34a';
+    return `<div class="write-row ${r.forced?'forced':''} ${r.ok?'ok':'fail'}">
+      <div class="write-dot"></div>
+      <div style="line-height:1.45">
+        <span style="font-weight:700;color:${color}">${STAGE_ICONS[r.stage]||''} ${r.company||r.stage}</span>
+        ${r.forced ? '<span style="color:var(--orange);font-size:.6rem;font-weight:700;margin-left:.3rem">⚡ FORCED</span>' : ''}
+        <span style="color:var(--text3);font-size:.6rem"> · ${STAGE_CITIES[r.stage]||''} · ${ts}</span><br>
+        <span style="color:${tempCol}">🌡 ${r.temperature}°C</span>
+        <span style="color:var(--text3)"> · ⏱ ${r.delay}min · 📦 ${r.inventory} units</span>
+        <span style="color:${stCol};font-weight:600"> · ${r.status}</span>
+      </div>
+      <div class="write-ok-badge" style="background:${r.ok?'rgba(22,163,74,.1)':'rgba(220,38,38,.1)'};color:${r.ok?'#16a34a':'#dc2626'}">
+        ${r.ok ? '✓ OK' : '✗ FAIL'}
+      </div>
+    </div>`;
+  }).join('');
+
+  setFlowStep('griddb', true);
+  setTimeout(()=>setFlowStep('griddb', false), 1200);
+}
+
+// Process flow highlight
+function setFlowStep(id, active){
+  const el = document.getElementById('flow-'+id);
+  if(el) el.classList.toggle('active', active);
+}
+
+let _toastTimer = null;
+
+// Inject anomaly
+async function injectAnomaly(stage){
+  try{
+    const res = await fetch(`/api/simulate/anomaly?stage=${stage}`, {method:'POST'});
+    if(!res.ok) return;
+
+    const col = document.getElementById('col-'+stage);
+    if(col){ col.style.filter='brightness(1.6) saturate(1.2)'; setTimeout(()=>col.style.filter='',600); }
+
+    setFlowStep('inject', true);
+    setTimeout(()=>setFlowStep('produce', true), 400);
+    setTimeout(()=>{ setFlowStep('inject',false); setFlowStep('produce',false); }, 5000);
+
+    const toast  = document.getElementById('inject-toast');
+    const tTitle = document.getElementById('toast-title');
+    const tBody  = document.getElementById('toast-body');
+    const tBar   = document.getElementById('toast-bar');
+    const INTERVAL = 2;
+
+    tTitle.innerHTML = `⚡ Anomaly injected into <span style="color:var(--orange)">${STAGE_COMPANIES[stage]||stage}</span>`;
+    tBody.textContent = `Spike event queued for ${STAGE_CITIES[stage]||stage}. Next batch in ~${INTERVAL}s…`;
+    tBar.style.transition = 'none';
+    tBar.style.width = '100%';
+    toast.style.display = 'block';
+    toast.style.animation = 'none';
+    void toast.offsetWidth;
+    toast.style.animation = 'toast-in .35s cubic-bezier(.34,1.56,.64,1)';
+
+    setTimeout(()=>{
+      tBar.style.transition = `width ${INTERVAL}s linear`;
+      tBar.style.width = '0%';
+    }, 80);
+
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(()=>{
+      toast.style.opacity='0';
+      toast.style.transition='opacity .4s';
+      setTimeout(()=>{ toast.style.display='none'; toast.style.opacity='1'; }, 400);
+    }, (INTERVAL+1)*1000);
+
+  }catch(e){ console.error(e) }
+}
+
+// Polling loop
+const POLL_NORMAL = 2000;
+const POLL_FAST   = 300;
+
+let warmupDone = false;
+let _pendingStage = null;
+let _pollTimer = null;
+
+function scheduleNextPoll(ms){
+  clearTimeout(_pollTimer);
+  _pollTimer = setTimeout(poll, ms);
+}
+
+async function poll(){
+  try{
+    const [snap, ins] = await Promise.all([
+      fetch('/api/snapshot').then(r=>r.json()),
+      fetch('/api/insights').then(r=>r.json()),
+    ]);
+
+    if(!snap.ready){ scheduleNextPoll(2000); return; }
+
+    if(!warmupDone){
+      warmupDone = true;
+      const w = document.getElementById('warmup');
+      w.style.transition = 'opacity .6s';
+      w.style.opacity = '0';
+      setTimeout(()=>w.style.display='none', 650);
+      setFlowStep('ml', true);
+      setFlowStep('dash', true);
+      setTimeout(()=>{ setFlowStep('ml',false); setFlowStep('dash',false); }, 2000);
+    }
+
+    state.stage_risks    = snap.stage_risks    || {};
+    state.cascade        = snap.cascade         || {};
+    state.recent_events  = snap.recent_events   || [];
+    state.stage_insights = snap.stage_insights  || {};
+    state.anomaly_intensity = snap.anomaly_intensity || {};
+
+    if(snap.scenario){
+      const s = snap.scenario;
+      document.getElementById('hdr-product').textContent = s.product || 'Ice Cream';
+      document.getElementById('hdr-sku').textContent = 'SKU: '+(s.sku||'—');
+      document.getElementById('hdr-route').textContent = s.route_summary||'';
+      document.getElementById('hdr-batch').textContent = s.batch_id||'';
+      document.getElementById('hdr-temp').textContent = '≤ '+(s.safe_temp_max||4)+'°C';
+      document.getElementById('route-label').textContent = s.route_summary||'';
+    }
+
+    if(snap.injection_pending){
+      _pendingStage = snap.injection_pending;
+      setFlowStep('produce', true);
+      scheduleNextPoll(POLL_FAST);
+      return;
+    } else if(_pendingStage){
+      _pendingStage = null;
+      setFlowStep('produce', false);
+      setFlowStep('griddb', true);
+      setFlowStep('ml', true);
+      setTimeout(()=>{ setFlowStep('griddb',false); setFlowStep('ml',false); setFlowStep('llm',true); }, 2000);
+      setTimeout(()=>{ setFlowStep('llm',false); setFlowStep('dash',true); }, 5000);
+      setTimeout(()=>setFlowStep('dash',false), 7000);
+    }
+
+    updateWritesLog(snap.recent_inserts || []);
+    updateNodes(state.stage_risks);
+    updateCascade(state.cascade);
+    updateFeed(state.recent_events);
+    updateInsights(ins);
+    if(selectedStage) renderDetailPanel(selectedStage);
+
+  } catch(e){ console.error('Poll error:', e) }
+  scheduleNextPoll(POLL_NORMAL);
+}
+
+window.addEventListener('resize', ()=>{ resizeCanvas(); initParticles(); });
+resizeCanvas();
+initParticles();
+animateParticles();
+poll();
+</script>
+</body>
+</html>
