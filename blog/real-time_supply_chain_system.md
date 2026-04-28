@@ -473,8 +473,6 @@ By shifting from isolated monitoring to system-wide intelligence, it becomes pos
 
 ---
 
----
-
 ## 16. Quick Start
 
 1. **Clone & Install**
